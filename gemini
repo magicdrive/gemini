@@ -1,0 +1,184 @@
+#! /bin/bash
+
+#
+# gemini
+# ====
+#
+# NAME
+# ----
+# gemini -- tiny bundler wrapper
+#
+# USAGE
+# ----
+#    * gemini [-v|--verbose]     # Considerate bundle install (detect vendor/)
+#    * gemini [-h|--help]     # Show this help.
+#    * gemini clean           # Clean up boilerplating & bundled files
+#    * gemini show-config     # Show bundle config
+#    * gemini install-bundler # exec `gem install bundler`
+#
+# Author
+#
+# Copyright (c) 2020 Hiroshi IKEGAMI
+#
+# MIT License
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+#
+#
+
+#set -e
+
+current=""
+
+gemini::usage::exit() {
+    cat << HELP
+USAGE:
+    * gemini [-v|--verbose]     # Considerate bundle install (detect vendor/)
+    * gemini [-h|--help]     # Show this help.
+    * gemini clean           # Clean up boilerplating & bundled files
+    * gemini show-config     # Show bundle config
+    * gemini install-bundler # exec \`gem install bundler\`
+HELP
+    exit 1
+}
+
+gemini::bundle::install() {
+    gemini::cd::gemfile::path
+    bundle install
+}
+
+gemini::config::set() {
+    gemini::cd::gemfile::path
+    bundle_path="${current}/.bundle"
+
+    if [ -e "${current}/vendor" ];then
+        bundle_path="${current}/vendor/bundle"
+    fi
+
+    bundle config set path "${bundle_path}"
+    bundle binstubs --path="${current}/.bundle/bin" 2> /dev/null
+}
+
+gemini::cd::gemfile::path() {
+    pwddir="$(pwd)"
+    while true;do
+        [ -e "${pwddir}/Gemfile" ] && break
+        if [ "$(cd "$pwddir"; pwd -P)" = "/" ];then
+            echo "Error: Gemfile is not found."
+            exit 1
+        fi
+        pwddir="${pwddir}/../"
+    done
+
+    current="$(cd "$pwddir"; pwd -P)"
+
+    cd "${current}"
+}
+
+gemini::config::show() {
+    gemini::cd::gemfile::path
+    bundle config
+}
+
+gemini::bundler() {
+    exec gem install bundler
+}
+
+gemini::clean() {
+    gemini::cd::gemfile::path
+    echo "rm -fr "${current}/.bundle""
+    rm -fr "${current}/.bundle"
+    if [ -e "${current}/vendor" ];then
+        echo "rm -fr "${current}/vendor/bundle""
+        rm -fr "${current}/vendor/bundle"
+    fi
+}
+
+if [ "$#" = 0 ];then
+    gemini::config::set
+    gemini::bundle::install
+    exit 0;
+fi
+
+case "${1}" in
+    set-config)
+        gemini::config::set
+        gemini::config::show
+        exit 0
+        ;;
+    show-config)
+        gemini::config::show
+        exit 0
+        ;;
+    clean)
+        gemini::clean
+        exit 0
+        ;;
+    install-bundler)
+        gemini::bundler
+        exit 0
+        ;;
+    *)
+        if [[ ! "${1}" =~ ^- ]];then
+            echo "Unknown option ${@}" >&2
+            exit 1
+        fi
+        ;;
+esac
+
+optspec=":-:hv"
+while getopts "$optspec" optchar; do
+    case "${optchar}" in
+        -)
+            case "${OPTARG}" in
+                verbose)
+                    gemini::config::set
+                    gemini::config::show
+                    gemini::bundle::install
+                    exit 0
+                    ;;
+                help)
+                    gemini::usage::exit && exit 1
+                    ;;
+                *)
+                    echo "Unknown option ${@}" >&2
+                    exit 1
+                    ;;
+            esac
+            ;;
+        v)
+            gemini::config::set
+            gemini::config::show
+            gemini::bundle::install
+            exit 0
+            ;;
+        h)
+            gemini::usage::exit; exit 1
+            ;;
+        *)
+            echo "Unknown option ${@}" >&2
+            exit 1
+            ;;
+
+    esac
+done
+
+

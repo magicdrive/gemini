@@ -7,11 +7,15 @@ gemini -- tiny bundler wrapper
 
 USAGE
 ----
-   * gemini [-v|--verbose]     # Considerate bundle install (detect vendor/)
+```
+   * gemini [-v|--verbose]  # Considerate bundle install (detect vendor/)
    * gemini [-h|--help]     # Show this help.
    * gemini clean           # Clean up boilerplating & bundled files
+   * gemini set-config      # Show bundle config
    * gemini show-config     # Show bundle config
    * gemini install-bundler # exec `gem install bundler`
+```
+
 
 Author
 

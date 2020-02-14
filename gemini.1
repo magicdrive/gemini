@@ -5,20 +5,22 @@
 gemini \-\- tiny bundler wrapper
 
 .SH USAGE
+.PP
 .RS
-.IP \(bu 2
-gemini [\-v|\-\-verbose]  # Considerate bundle install (detect vendor/)
-.IP \(bu 2
-gemini [\-h|\-\-help]     # Show this help.
-.IP \(bu 2
-gemini clean           # Clean up boilerplating \& bundled files
-.IP \(bu 2
-gemini set\-config      # Set bundle config
-.IP \(bu 2
-gemini show\-config     # Show bundle config
-.IP \(bu 2
-gemini install\-bundler # exec \fB\fCgem install bundler\fR
 
+.nf
+ * gemini                 # Considerate `bundle install` (Accept env `gemini\_path` and `gemini\_binstubs`)
+ * gemini [\-h|\-\-help]     # Show this help.
+ * gemini [\-j|\-\-dry\-run]  # Show bundle install plot (No installation is performed)
+ * gemini [\-v|\-\-verbose]  # Considerate bundle install with verbose.
+ * gemini version         # Show gemini version info.
+ * gemini purge           # Clean up `.bundle`,  boilerplatings and  bundled\-files
+ * gemini clean           # Clean up boilerplatings and bundled files
+ * gemini set\-config      # Set bundle config (Accept env `gemini\_path` and `gemini\_binstubs`)
+ * gemini show\-config     # Show bundle config
+ * gemini install\-bundler # exec `gem install bundler`
+
+.fi
 .RE
 
 .PP
@@ -44,11 +46,13 @@ distribute, sublicense, and/or sell copies of the Software, and to
 permit persons to whom the Software is furnished to do so, subject to
 .br
 the following conditions:
+.br
 
 .PP
 The above copyright notice and this permission notice shall be
 .br
 included in all copies or substantial portions of the Software.
+.br
 
 .PP
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
@@ -64,3 +68,4 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 .br
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+.br

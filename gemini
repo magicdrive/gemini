@@ -10,12 +10,18 @@
 #
 # USAGE
 # ----
-#    * gemini [-v|--verbose]  # Considerate bundle install (detect vendor/)
-#    * gemini [-h|--help]     # Show this help.
-#    * gemini clean           # Clean up boilerplating & bundled files
-#    * gemini set-config      # Set bundle config
-#    * gemini show-config     # Show bundle config
-#    * gemini install-bundler # exec `gem install bundler`
+# ```
+#  * gemini                 # Considerate `bundle install` (Accept env `gemini_path` and `gemini_binstubs`)
+#  * gemini [-h|--help]     # Show this help.
+#  * gemini [-j|--dry-run]  # Show bundle install plot (No installation is performed)
+#  * gemini [-v|--verbose]  # Considerate bundle install with verbose.
+#  * gemini version         # Show gemini version info.
+#  * gemini purge           # Clean up `.bundle`, boilerplatings and bundled-files
+#  * gemini clean           # Clean up boilerplatings and bundled files
+#  * gemini set-config      # Set bundle config (Accept env `gemini_path` and `gemini_binstubs`)
+#  * gemini show-config     # Show bundle config
+#  * gemini install-bundler # exec `gem install bundler`
+# ```
 #
 # Author
 #
@@ -57,14 +63,22 @@ export GEMINI_DEFAULT_BINSTUBS_VENDOR_SUFFIX=${GEMINI_DEFAULT_BINSTUBS_VENDOR_SU
 gemini::usage::exit() {
     cat << HELP
 USAGE:
-    * gemini [-v|--verbose]  # Considerate bundle install (detect vendor/)
+    * gemini                 # Considerate \`bundle install\` (Accept env \`gemini_path\` and \`gemini_binstubs\`)
     * gemini [-h|--help]     # Show this help.
-    * gemini clean           # Clean up boilerplating & bundled files
-    * gemini set-config      # Set bundle config
+    * gemini [-j|--dry-run]  # Show bundle install plot (No installation is performed)
+    * gemini [-v|--verbose]  # Considerate bundle install with verbose.
+    * gemini version         # Show gemini version info.
+    * gemini purge           # Clean up \`.bundle\`,  boilerplatings and  bundled-files
+    * gemini clean           # Clean up boilerplatings and bundled files
+    * gemini set-config      # Set bundle config (Accept env \`gemini_path\` and \`gemini_binstubs\`)
     * gemini show-config     # Show bundle config
     * gemini install-bundler # exec \`gem install bundler\`
 HELP
     exit 1
+}
+
+gemini::version::show() {
+    echo "gemini version 1.0.0"
 }
 
 gemini::bundle::install() {
@@ -89,7 +103,7 @@ gemini::config::set() {
     gemini::path::fix
 
     set +e
-    bundle config set path "${bundle_path}" 2> /dev/null
+    bundle config --local path "${bundle_path}" 2> /dev/null
     bundle binstubs --path "${binstubs_path}" 2> /dev/null
     set -e
 }
@@ -99,7 +113,7 @@ gemini::cd::gemfile::path() {
     while true;do
         [ -e "${pwddir}/Gemfile" ] && break
         if [ "$(cd "$pwddir"; pwd -P)" = "/" ];then
-            echo "Error: Gemfile is not found."
+            echo "Error: Gemfile not found."
             exit 1
         fi
         pwddir="${pwddir}/../"
@@ -108,6 +122,31 @@ gemini::cd::gemfile::path() {
     current="$(cd "$pwddir"; pwd -P)"
 
     cd "${current}"
+}
+
+gemini::bundle::install::plot() {
+    gemini::cd::gemfile::path
+    gemini::path::fix
+
+    echo "detected Gemfile --"
+    echo "${current}/Gemfile"
+    echo
+    echo "--------------"
+
+    echo
+    echo "bundled gems --"
+    bundle list
+    echo
+    echo "--------------"
+
+    echo
+    echo "bundle config --"
+    echo
+
+    echo "-- bundle config --local path "${bundle_path}""
+    echo
+    echo "-- bundle binstubs --path "${binstubs_path}""
+
 }
 
 gemini::config::show() {
@@ -119,12 +158,18 @@ gemini::bundler() {
     exec gem install bundler
 }
 
+gemini::bundle::clean() {
+    gemini::cd::gemfile::path
+
+    if [ -e "${current}/.bundle" ];then
+        echo "rm -fr "${current}/.bundle""
+        rm -fr "${current}/.bundle"
+    fi
+}
+
 gemini::clean() {
     gemini::cd::gemfile::path
     gemini::path::fix
-
-    echo "rm -fr "${current}/.bundle""
-    rm -fr "${current}/.bundle"
 
     for x in $(echo "${bundle_path}" "${binstubs_path}");do
         if [ -e "${x}" ];then
@@ -141,6 +186,10 @@ if [ "$#" = 0 ];then
 fi
 
 case "${1}" in
+    version)
+        gemini::version::show
+        exit 0
+        ;;
     set-config)
         gemini::config::set
         gemini::config::show
@@ -148,6 +197,11 @@ case "${1}" in
         ;;
     show-config)
         gemini::config::show
+        exit 0
+        ;;
+    purge)
+        gemini::bundle::clean
+        gemini::clean
         exit 0
         ;;
     clean)
@@ -166,11 +220,15 @@ case "${1}" in
         ;;
 esac
 
-optspec=":-:hv"
+optspec=":-:hvj"
 while getopts "$optspec" optchar; do
     case "${optchar}" in
         -)
             case "${OPTARG}" in
+                dry-run)
+                    gemini::bundle::install::plot
+                    exit 0
+                    ;;
                 verbose)
                     gemini::config::set
                     gemini::config::show
@@ -185,6 +243,10 @@ while getopts "$optspec" optchar; do
                     exit 1
                     ;;
             esac
+            ;;
+        j)
+            gemini::bundle::install::plot
+            exit 0
             ;;
         v)
             gemini::config::set

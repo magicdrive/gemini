@@ -8,12 +8,16 @@ gemini -- tiny bundler wrapper
 USAGE
 ----
 ```
-   * gemini [-v|--verbose]  # Considerate bundle install (detect vendor/)
-   * gemini [-h|--help]     # Show this help.
-   * gemini clean           # Clean up boilerplating & bundled files
-   * gemini set-config      # Show bundle config
-   * gemini show-config     # Show bundle config
-   * gemini install-bundler # exec `gem install bundler`
+ * gemini                 # Considerate `bundle install` (Accept env `gemini_path` and `gemini_binstubs`)
+ * gemini [-h|--help]     # Show this help.
+ * gemini [-j|--dry-run]  # Show bundle install plot (No installation is performed)
+ * gemini [-v|--verbose]  # Considerate bundle install with verbose.
+ * gemini version         # Show gemini version info.
+ * gemini purge           # Clean up `.bundle`, boilerplatings and bundled-files
+ * gemini clean           # Clean up boilerplatings and bundled files
+ * gemini set-config      # Set bundle config (Accept env `gemini_path` and `gemini_binstubs`)
+ * gemini show-config     # Show bundle config
+ * gemini install-bundler # exec `gem install bundler`
 ```
 
 

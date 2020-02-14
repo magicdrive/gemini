@@ -45,7 +45,7 @@
 #
 #
 
-#set -e
+set -eu
 
 current=""
 
@@ -75,8 +75,10 @@ gemini::config::set() {
         bundle_path="${current}/vendor/bundle"
     fi
 
-    bundle config set path "${bundle_path}"
+    set +e
+    bundle config set path "${bundle_path}" 2> /dev/null
     bundle binstubs --path="${current}/.bundle/bin" 2> /dev/null
+    set -e
 }
 
 gemini::cd::gemfile::path() {

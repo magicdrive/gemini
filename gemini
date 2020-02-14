@@ -10,7 +10,7 @@
 #
 # USAGE
 # ----
-#    * gemini [-v|--verbose]     # Considerate bundle install (detect vendor/)
+#    * gemini [-v|--verbose]  # Considerate bundle install (detect vendor/)
 #    * gemini [-h|--help]     # Show this help.
 #    * gemini clean           # Clean up boilerplating & bundled files
 #    * gemini set-config      # Set bundle config
@@ -52,7 +52,7 @@ current=""
 gemini::usage::exit() {
     cat << HELP
 USAGE:
-    * gemini [-v|--verbose]     # Considerate bundle install (detect vendor/)
+    * gemini [-v|--verbose]  # Considerate bundle install (detect vendor/)
     * gemini [-h|--help]     # Show this help.
     * gemini clean           # Clean up boilerplating & bundled files
     * gemini set-config      # Set bundle config

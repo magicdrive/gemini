@@ -49,6 +49,11 @@ set -eu
 
 current=""
 
+export GEMINI_DEFAULT_PATH_SUFFIX="${GEMINI_DEFAULT_PATH_SUFFIX:-".bundle"}"
+export GEMINI_DEFAULT_PATH_VENDOR_SUFFIX="${GEMINI_DEFAULT_PATH_VENDOR_SUFFIX:-"vendor/bundle"}"
+export GEMINI_DEFAULT_BINSTUBS_SUFFIX=${GEMINI_DEFAULT_BINSTUBS_SUFFIX:-".bundle/bin"}
+export GEMINI_DEFAULT_BINSTUBS_VENDOR_SUFFIX=${GEMINI_DEFAULT_BINSTUBS_VENDOR_SUFFIX:-"vendor/bin"}
+
 gemini::usage::exit() {
     cat << HELP
 USAGE:
@@ -67,17 +72,25 @@ gemini::bundle::install() {
     bundle install
 }
 
-gemini::config::set() {
-    gemini::cd::gemfile::path
-    bundle_path="${current}/.bundle"
+gemini::path::fix() {
+    bundle_path="${gemini_path:-"${current}/${GEMINI_DEFAULT_PATH_SUFFIX}"}"
+    binstubs_path="${gemini_binstubs:-"${current}/${GEMINI_DEFAULT_BINSTUBS_SUFFIX}"}"
 
     if [ -e "${current}/vendor" ];then
-        bundle_path="${current}/vendor/bundle"
+        bundle_path="${gemini_path:-"${current}/${GEMINI_DEFAULT_PATH_VENDOR_SUFFIX}"}"
+        binstubs_path="${gemini_binstubs:-"${current}/${GEMINI_DEFAULT_BINSTUBS_VENDOR_SUFFIX}"}"
     fi
+    export bundle_path
+    export binstubs_path
+}
+
+gemini::config::set() {
+    gemini::cd::gemfile::path
+    gemini::path::fix
 
     set +e
     bundle config set path "${bundle_path}" 2> /dev/null
-    bundle binstubs --path="${current}/.bundle/bin" 2> /dev/null
+    bundle binstubs --path "${binstubs_path}" 2> /dev/null
     set -e
 }
 
@@ -108,12 +121,17 @@ gemini::bundler() {
 
 gemini::clean() {
     gemini::cd::gemfile::path
+    gemini::path::fix
+
     echo "rm -fr "${current}/.bundle""
     rm -fr "${current}/.bundle"
-    if [ -e "${current}/vendor" ];then
-        echo "rm -fr "${current}/vendor/bundle""
-        rm -fr "${current}/vendor/bundle"
-    fi
+
+    for x in $(echo "${bundle_path}" "${binstubs_path}");do
+        if [ -e "${x}" ];then
+            echo "rm -fr "${x}""
+            rm -fr "${x}"
+        fi
+    done
 }
 
 if [ "$#" = 0 ];then

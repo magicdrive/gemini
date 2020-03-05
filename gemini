@@ -102,10 +102,10 @@ gemini::config::set() {
     gemini::cd::gemfile::path
     gemini::path::fix
 
-    set +e
-    bundle config --local path "${bundle_path}" 2> /dev/null
-    bundle binstubs --path "${binstubs_path}" 2> /dev/null
-    set -e
+    echo "bundle config --local path "${bundle_path}""
+    bundle config --local path "${bundle_path}"
+    echo "bundle config --local bin  "${binstubs_path}""
+    bundle config --local bin  "${binstubs_path}"
 }
 
 gemini::cd::gemfile::path() {
@@ -145,7 +145,7 @@ gemini::bundle::install::plot() {
 
     echo "-- bundle config --local path "${bundle_path}""
     echo
-    echo "-- bundle binstubs --path "${binstubs_path}""
+    echo "-- bundle config --local bin  "${binstubs_path}""
 
 }
 

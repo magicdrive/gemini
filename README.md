@@ -12,6 +12,7 @@ USAGE
  * gemini [-h|--help]     # Show this help.
  * gemini [-j|--dry-run]  # Show bundle install plot (No installation is performed)
  * gemini [-v|--verbose]  # Considerate bundle install with verbose.
+ * gemini [-f|--force]    # force config (path and bin), and exec `gemini bundle-install`.
  * gemini version         # Show gemini version info.
  * gemini purge           # Clean up `.bundle`, boilerplatings and bundled-files
  * gemini clean           # Clean up boilerplatings and bundled files

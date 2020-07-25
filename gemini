@@ -11,17 +11,17 @@
 # USAGE
 # ----
 # ```
-#  * gemini                 # Considerate `bundle install` (Accept env `gemini_path` and `gemini_binstubs`)
-#  * gemini [-h|--help]     # Show this help.
-#  * gemini [-j|--dry-run]  # Show bundle install plot (No installation is performed)
-#  * gemini [-v|--verbose]  # Considerate bundle install with verbose.
-#  * gemini [-f|--force]    # force config (path and bin), and exec \`gemini bundle-install\`.
-#  * gemini version         # Show gemini version info.
-#  * gemini purge           # Clean up `.bundle`, boilerplatings and bundled-files
-#  * gemini clean           # Clean up boilerplatings and bundled files
-#  * gemini set-config      # Set bundle config (Accept env `gemini_path` and `gemini_binstubs`)
-#  * gemini show-config     # Show bundle config
-#  * gemini install-bundler # exec `gem install bundler`
+#  * gemini [bundle-install] # Considerate `bundle install` (Accept env `gemini_path` and `gemini_binstubs`)
+#  * gemini [-h|--help]      # Show this help.
+#  * gemini [-j|--dry-run]   # Show bundle install plot (No installation is performed)
+#  * gemini [-v|--verbose]   # Considerate bundle install with verbose.
+#  * gemini [--force]        # force config (path and bin), and exec `gemini bundle-install`.
+#  * gemini version          # Show gemini version info.
+#  * gemini purge            # Clean up `.bundle`, boilerplatings and bundled-files
+#  * gemini clean            # Clean up boilerplatings and bundled files
+#  * gemini set-config       # Set bundle config (Accept env `gemini_path` and `gemini_binstubs`)
+#  * gemini show-config      # Show bundle config
+#  * gemini install-bundler  # exec `gem install bundler`
 # ```
 #
 # Author
@@ -64,17 +64,17 @@ export GEMINI_DEFAULT_BINSTUBS_VENDOR_SUFFIX=${GEMINI_DEFAULT_BINSTUBS_VENDOR_SU
 gemini::usage::exit() {
     cat << HELP
 USAGE:
-    * gemini                 # Considerate \`bundle install\` (Accept env \`gemini_path\` and \`gemini_binstubs\`)
-    * gemini [-h|--help]     # Show this help.
-    * gemini [-j|--dry-run]  # Show bundle install plot (No installation is performed)
-    * gemini [-v|--verbose]  # Considerate bundle install with verbose.
-    * gemini [-f|--force]    # force config (path and bin), and exec \`gemini bundle-install\`.
-    * gemini version         # Show gemini version info.
-    * gemini purge           # Clean up \`.bundle\`,  boilerplatings and  bundled-files
-    * gemini clean           # Clean up boilerplatings and bundled files
-    * gemini set-config      # Set bundle config (Accept env \`gemini_path\` and \`gemini_binstubs\`)
-    * gemini show-config     # Show bundle config
-    * gemini install-bundler # exec \`gem install bundler\`
+    * gemini [bundle-install] # Considerate \`bundle install\` (Accept env \`gemini_path\` and \`gemini_binstubs\`)
+    * gemini [-h|--help]      # Show this help.
+    * gemini [-j|--dry-run]   # Show bundle install plot (No installation is performed)
+    * gemini [-v|--verbose]   # Considerate bundle install with verbose.
+    * gemini [--force]        # force config (path and bin), and exec \`gemini bundle-install\`.
+    * gemini version          # Show gemini version info.
+    * gemini purge            # Clean up \`.bundle\`, boilerplatings and bundled-files
+    * gemini clean            # Clean up boilerplatings and bundled files
+    * gemini set-config       # Set bundle config (Accept env \`gemini_path\` and \`gemini_binstubs\`)
+    * gemini show-config      # Show bundle config
+    * gemini install-bundler  # exec \`gem install bundler\`
 HELP
     exit 1
 }
@@ -115,7 +115,7 @@ gemini::config::set() {
     gemini::cd::gemfile::path
     gemini::path::fix
 
-    if [ "$(bundle config path | grep "Set for")" = "" ];then
+    if [ "$(bundle config path | grep -E "^Set for")" = "" ];then
         echo "bundle config --local path "${bundle_path}""
         bundle config --local path "${bundle_path}"
     else
@@ -126,7 +126,7 @@ gemini::config::set() {
         echo "...."
         echo
     fi
-    if [ "$(bundle config path | grep "Set for")" = "" ];then
+    if [ "$(bundle config path | grep -E "^Set for")" = "" ];then
         echo "bundle config --local bin  "${binstubs_path}""
         bundle config --local bin  "${binstubs_path}"
     else
@@ -217,6 +217,11 @@ if [ "$#" = 0 ];then
 fi
 
 case "${1}" in
+    bundle-install)
+        gemini::config::set
+        gemini::bundle::install
+        exit 0
+        ;;
     version)
         gemini::version::show
         exit 0
@@ -251,7 +256,7 @@ case "${1}" in
         ;;
 esac
 
-optspec=":-:hvjf"
+optspec=":-:hvj"
 while getopts "$optspec" optchar; do
     case "${optchar}" in
         -)
@@ -279,11 +284,6 @@ while getopts "$optspec" optchar; do
                     exit 1
                     ;;
             esac
-            ;;
-        f)
-            gemini::config::set::force
-            gemini::bundle::install
-            exit 0
             ;;
         j)
             gemini::bundle::install::plot

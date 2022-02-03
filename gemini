@@ -82,12 +82,13 @@ HELP
 }
 
 gemini::version::show() {
-    echo "gemini version 1.1.0"
+    echo "gemini version 2.0.0"
 }
 
 gemini::bundle::install() {
     gemini::cd::gemfile::path
     bundle install
+    bundle binstub --all
 }
 
 gemini::path::fix() {
